@@ -1,0 +1,21 @@
+!!! XML
+!!!
+%html{:xmlns => "http://www.w3.org/1999/xhtml"}
+  %head
+    %meta(http-equiv="content-type" content="text/html; charset=utf-8")
+    %meta(name="keywords" content="")
+    %meta(name="description" content="")
+
+    %title jsHub Tag Inspector
+
+    / jQuery for effects
+    %script{:src => 'javascripts/jquery/jquery.js'}
+    %script{:src => 'javascripts/jquery/jquery-ui-1.7.2.custom.js'}
+    %script{:src => 'javascripts/jquery/ui.core.js'}
+    %script{:src => 'javascripts/jquery/ui.accordion.js'}
+
+    / Stylesheets
+    %link(href="stylesheets/inspector.css" media="screen" rel="stylesheet" type="text/css")
+
+  %body
+    =yield

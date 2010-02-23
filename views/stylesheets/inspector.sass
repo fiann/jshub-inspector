@@ -1,0 +1,333 @@
+# CONSTANTS
+!panel_font_size = 12px
+!panel_font_family = Helvetica, "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", "Bitstream Vera Sans", "Liberation Sans", Verdana, "Verdana Ref", sans-serif
+!panel_width = 265px
+
+!color_bg = #000
+!color_bg_light = #eee
+
+!color_text_normal = #333
+!color_text_bold = #000
+!color_text_message = #fff
+!color_text_title = #858689
+
+!color_border_top = #171717
+!color_border = #000
+
+# TITLE BAR
+
+# STATUS BAR
+!status_bar_height = 50px
+
+# OLD CONSTANTS
+!color_text_mid = #666
+!color_text_light = #999
+
+!color_bg_dark = #000
+!color_bg_mid = #808080
+
+!color_success = #060
+!color_error = #c00
+!color_warning = #808080
+!color_info = #fc3
+
+!grid_icon_large = 50px
+!grid_icon_small = 25px
+
+!radius_border = 0.6em
+
+# jshub-button constants
+!color_border_button = #000
+!color_bg_button = #808080
+
+# accordion constants
+!color_events_bg_light = #fff
+!color_border_separator = #999
+
+# Mixins
+=accessible-link-replacement
+  :display block
+  :height inherit
+  :overflow hidden
+  :text-indent -10000em
+  :text-decoration none
+
+
+
+####################################################
+#
+# Inspector styles
+#
+####################################################
+
+div#jshub-inspector
+  :font
+    :size 85%
+    :family = !panel_font_family
+
+  # Only present a single state for now - panel has large icon and jshub-buttons
+  # This is equivalent to .state2 in version 1
+  :width = !panel_width !important
+  :border-top-color = !color_border_top
+  :border-bottom-color = !color_border
+  :background
+    :color  = !color_bg
+
+  ####################################################
+  #
+  # Header: the title bar
+  #
+  ####################################################
+
+  #jshub-inspector-header
+    :height 24px
+    :line-height 24px
+    :border-color = !color_border
+    :background
+      :color = !color_bg
+      :image url('assets/images/inspector_highlights.png')
+      :repeat no-repeat 
+      :attachment scroll 
+      :position left -50px
+    :cursor move
+    :position relative
+  
+    .title 
+      :color = !color_text_title
+      :font-weight bold
+      :font-size 93% !important
+      :padding-left 8px
+          
+    .container-close
+      +accessible-link-replacement
+      :width 16px
+      # resizing causes the style to be changed to inherit
+      :height 17px !important
+      :background
+        :image url('assets/images/inspector_icons_small.png')
+        :position -50px -450px
+        :repeat no-repeat
+      :cursor pointer
+      :position absolute
+      :right 6px
+      :top 5px
+
+  ####################################################
+  #
+  # Status: the current status of the inspector:
+  # success / error / warning 
+  #
+  ####################################################
+
+  #jshub-inspector-status
+    :height 50px
+    :background
+      :color transparent 
+      :image url('assets/images/inspector_icons_large.png') 
+      :repeat no-repeat 
+      :attachment scroll 
+    div.text
+      :width 74.1%
+      :float right
+    p.self
+      :margin 0
+      :padding 0
+      :padding-top 4px
+      :color = #fff
+      :font
+        :size 100%
+        :weight normal
+      :line-height 20px
+    p.message
+      :margin 0
+      :padding 0
+      :color = !color_text_message
+      :font
+        :size = !panel_font_size
+        :weight bold  
+      :line-height 20px
+
+    # Icon states          
+    &.success 
+      :background
+        :position = (- !status_bar_height) (-3 * !status_bar_height)
+    &.error 
+      :background
+        :position = (- !status_bar_height) (-2 * !status_bar_height)
+    &.info 
+      :background
+        :position = (- !status_bar_height) (-4 * !status_bar_height)
+    &.warning 
+      :background
+        :position = (- !status_bar_height) (-1 * !status_bar_height)
+
+  ####################################################
+  #
+  # Events: the accordion displaying the events and 
+  # configuration data
+  #
+  ####################################################
+
+  #jshub-inspector-events
+    # override the default width so we can add margins without breaking the bounding box
+    # :width inherit !important
+    :border none
+    :padding 5px
+    :margin 2px
+    :margin-bottom 5px
+    :background
+      :color transparent
+      
+    # container for the event accordion
+    #accordion
+      :background-color = !color_events_bg_light
+      :font-size 85%
+    
+      # the clickable panel headings
+      h3.accordion-header
+        :position relative
+        :font-size 105%
+        :padding 0.2em 0.3em 0.15em 0.3em
+        :margin 0
+        :border-width 1px
+        :border-style solid
+        :border-top-color #c4c4c6
+        :border-right-color #545556
+        :border-bottom-color #383839
+        :border-left-color #9fa0a2
+        :background none
+        :background
+          :image url('assets/images/inspector_highlights.png')
+          :color #858688
+          :repeat no-repeat 
+          :attachment scroll 
+          :position left -150px
+        &.active
+          :background
+            :position left -250px
+            :color #235A98
+          :border-top-color #85afd0
+          :border-right-color #1c4a6d
+          :border-bottom-color #012642
+          :border-left-color #387eb2
+
+        a
+          :color #fff
+          :text-decoration none
+          &.active
+            :background
+              :position left -250px
+            :border-top-color #85afd0
+            :border-right-color #1c4a6d
+            :border-bottom-color #012642
+            :border-left-color #387eb2
+        # custom count indicator
+        span.count
+          :color #fff
+          :float right
+      
+      # The body of the accordion panel
+      div.accordion-content
+        :overflow auto
+        :min-height 100px
+        :max-height 350px
+        :color = !color_text_normal
+        :margin 0
+        :padding 5px
+        :padding-bottom 0
+        :border none
+        
+        &.empty
+          :padding 0
+          :min-height 0
+          :height 0
+        
+        hr.event-separator
+          :margin 5px 0
+        
+        # Accordion text
+        p
+          :margin 0.2em 0
+          &.event-name
+            :color = !color_text_bold
+            :font-weight bold
+          &.message
+            :background
+              :color transparent 
+              :image url('assets/images/icon-indicator-sprite.png') 
+              :repeat no-repeat 
+              :attachment scroll
+            :padding-left 18px
+            :padding-top 2px
+            :min-height 20px
+            &.success
+              :background-position = -21px (-16-(1*!grid_icon_large))
+            &.error
+              :color #D52515
+              :background-position = -21px (-16-(2*!grid_icon_large))
+            &.info
+              :background-position = -21px (-18-(3*!grid_icon_large))
+            &.warning
+              :color #ff6600
+              :background
+                :image url('assets/images/inspector_icons_small.png')
+                :position -49px -148px
+          
+        table
+          :width 100%
+          :border-collapse collapse
+          :border 
+            :width 2px 
+            :color = !color_events_bg_light
+          tr.even
+            :background-color = !color_bg_light
+          td
+            :vertical-align top
+            :padding 0.3em 0.2em 0.2em 0
+
+        # inline status icons
+
+      
+  ####################################################
+  #
+  # Footer: displays the jsHub logo and code version
+  #
+  ####################################################
+
+  #jshub-inspector-footer
+    :position relative
+    :border-top 1px solid #808080
+    :font-size 77%
+    :padding 5px 10px
+    div.logo
+      :position absolute
+      :left 0
+      :top 0
+      :width 50px
+      :height 100%
+      :background
+        :image url('assets/images/inspector_icons_small.png')
+        :position -50px -50px
+    div.version
+      :padding-left 45px
+      :height 100%
+      :color #fff
+    div.resize-handle
+      :position absolute
+      :bottom 0
+      :right 0
+      :z-index 2
+      :cursor se-resize
+      :width 15px
+      :height 15px 
+      :background
+        :color #000
+        :image url('assets/images/inspector_icons_small.png')
+        :position -50px -350px
+        :repeat no-repeat  
+
+  .jshub-buttons.large
+    :text-align center
+    :padding 3px 0
+
+

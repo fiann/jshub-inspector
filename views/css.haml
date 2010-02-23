@@ -1,0 +1,96 @@
+%h1 CSS checks
+
+%h2 Basic layout maximized
+
+#example2a
+  Example 2a
+
+  #jshub-inspector-container
+    #jshub-inspector
+
+      #jshub-inspector-header
+        %span.title jsHub Tag Inspector
+        %span.container-close Close
+
+      .success#jshub-inspector-status
+        .text
+          %p.self jsHub is
+          %p.message Installed &amp; active
+
+      #jshub-inspector-events
+        #accordion
+          %h3.accordion-header.active
+            %a Page events 
+            %span.count 2
+          %div.accordion-content
+            %p.event-name Data capture start
+            %hr.event-separator
+
+            %p.event-name Page view
+            %table
+              %tr.odd
+                %td Url:
+                %td http://localhost/inspector/very/long/url/should/scroll/horizontal/not/wrap
+              %tr.even
+                %td Title:
+                %td Test Page: jsHub Inspector < YUI Widget < Unit Tests
+              %tr.odd
+                %td Name:
+                %td Inspector dev
+              %tr.even
+                %td Category:
+                %td Laptop, Computers, 15-inch
+
+            %hr.event-separator
+        
+          %h3.accordion-header 
+            %span.count 0
+            %a Ecommerce events here is a very long title that will wrap
+          %div.accordion-content.empty
+        
+          %h3.accordion-header 
+            %a Data sources
+            %span.count 2
+          %div.accordion-content
+            %p.event-name Technographic Plugin
+            %p.message.info Data capture plugin
+            %table
+              %tr.odd
+                %td Vendor:
+                %td jsHub.org
+              %tr.even
+                %td Author:
+                %td Liam Clancy
+              %tr.odd
+                %td Version:
+                %td 0.1
+            %hr.event-separator
+          
+            %p.event-name hAuthentication Microformat Parser Plugin
+            %p.message.info Data capture plugin
+            %table
+              %tr.odd
+                %td Vendor:
+                %td jsHub.org
+              %tr.even
+                %td Author:
+                %td Liam Clancy
+              %tr.odd
+                %td Version:
+                %td 0.1
+            %hr.event-separator
+            %p.message.success Success message
+            %p.message.info Info message
+            %p.message.warning Warning message
+            %p.message.error Error message
+     
+          %h3.accordion-header 
+            %a Inline content updates
+            %span.count 0
+          %div.accordion-content.empty
+
+      #jshub-inspector-footer
+        .logo
+        .version Tag Inspector v2.0.dev
+        .resize-handle
+
