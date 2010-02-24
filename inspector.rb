@@ -2,11 +2,17 @@
 
 require 'rubygems'
 require 'sinatra'
+gem 'sinatra-static-assets'
+require 'sinatra/static_assets'
 require 'haml'
 
 
 get '/' do
   haml :index
+end
+
+get '/build.html' do
+  haml :build
 end
 
 get '/css.html' do

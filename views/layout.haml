@@ -8,14 +8,17 @@
 
     %title jsHub Tag Inspector
 
+    / Debug console
+    =javascript_script_tag('/javascripts/debug/debug.js')
+
     / jQuery for effects
-    %script{:src => 'javascripts/jquery/jquery.js'}
-    %script{:src => 'javascripts/jquery/jquery-ui-1.7.2.custom.js'}
-    %script{:src => 'javascripts/jquery/ui.core.js'}
-    %script{:src => 'javascripts/jquery/ui.accordion.js'}
+    =javascript_script_tag('/javascripts/jquery/jquery.js')
+    =javascript_script_tag('/javascripts/jquery/jquery-ui-1.7.2.custom.js', '/javascripts/jquery/ui.core.js')
+    =javascript_script_tag('/javascripts/jquery/ui.accordion.js')
+    =stylesheet_link_tag('/stylesheets/jquery/ui.all.css')
 
     / Stylesheets
-    %link(href="stylesheets/inspector.css" media="screen" rel="stylesheet" type="text/css")
+    =stylesheet_link_tag('/stylesheets/inspector.css')
 
   %body
     =yield
