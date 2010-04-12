@@ -1,0 +1,20 @@
+:javascript
+  function install (aEvent)
+  {
+    var params = {
+      "Inspector": { URL: aEvent.target.href,
+        // IconURL: aEvent.target.getAttribute("iconURL"),
+        // Hash: aEvent.target.getAttribute("hash"),
+        toString: function () { return this.URL; }
+      }
+    };
+    InstallTrigger.install(params);
+
+    return false;
+  }
+
+%a{ :href => "inspector-2.0.xpi", :onclick => "return install(event);" } Install jsHub Inspector
+/
+  iconURL="http://www.example.com/foo.png"
+  hash="sha1:28857e60d043447c5f4550853f2d40770b326a13", 
+  
