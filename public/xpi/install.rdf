@@ -17,8 +17,8 @@
       </Description>
     </em:targetApplication>
 
-    <em:name>firebugtestextension</em:name>
-    <em:description>jsHub activity inspector</em:description>
+    <em:name>jsHub Inspector</em:name>
+    <em:description>Activity inspector for jsHub tags</em:description>
     <em:creator>Fiann O'Hagan</em:creator>
     <em:homepageURL>http://jshub.org/</em:homepageURL>
   </Description>      

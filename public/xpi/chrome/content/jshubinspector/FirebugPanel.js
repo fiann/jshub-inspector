@@ -36,36 +36,36 @@
 
 
 FBL.ns(function() { with (FBL) { 
-Firebug.FirebugTestExtension = extend(Firebug.Module, 
+Firebug.JsHubInspector = extend(Firebug.Module, 
 { 
-    shutdown: function()
-    {
-      if(Firebug.getPref('defaultPanelName')=='FirebugTestExtension') {
-        Firebug.setPref('defaultPanelName','console');
-      }
-    },
-    showPanel: function(browser, panel) 
-    { 
-        var isFirebugTestExtension = panel && panel.name == "FirebugTestExtension"; 
-        var FirebugTestExtensionButtons = browser.chrome.$("fbFirebugTestExtensionButtons"); 
-        collapse(FirebugTestExtensionButtons, !isFirebugTestExtension); 
-    }, 
-    button1: function() 
-    { 
-      FirebugContext.getPanel("FirebugTestExtension").printLine('Clicked Button 1'); 
-    }, 
-    button2: function() 
-    { 
-      FirebugContext.getPanel("FirebugTestExtension").printLine('Clicked Button 2'); 
-    } 
+  shutdown: function()
+  {
+    if (Firebug.getPref('defaultPanelName') == 'JsHubInspector') {
+      Firebug.setPref('defaultPanelName', 'console');
+    }
+  },
+  showPanel: function(browser, panel) 
+  { 
+      var isShowing = panel && panel.name == "JsHubInspector"; 
+      var JsHubInspectorButtons = browser.chrome.$("fbJsHubInspectorButtons"); 
+      collapse(JsHubInspectorButtons, ! isShowing); 
+  }, 
+  button1: function() 
+  { 
+    FirebugContext.getPanel("JsHubInspector").printLine('Clicked Button 1'); 
+  }, 
+  button2: function() 
+  { 
+    FirebugContext.getPanel("JsHubInspector").printLine('Clicked Button 2'); 
+  } 
 }); 
 
 
-function FirebugTestExtensionPanel() {} 
-FirebugTestExtensionPanel.prototype = extend(Firebug.Panel, 
+function JsHubInspectorPanel() {};
+JsHubInspectorPanel.prototype = extend(Firebug.Panel, 
 { 
-    name: "FirebugTestExtension", 
-    title: "Test Panel", 
+    name: "JsHubInspector", 
+    title: "jsHub Tag", 
     searchable: false, 
     editable: false,
 
@@ -77,7 +77,7 @@ FirebugTestExtensionPanel.prototype = extend(Firebug.Panel,
 }); 
 
 
-Firebug.registerModule(Firebug.FirebugTestExtension); 
-Firebug.registerPanel(FirebugTestExtensionPanel); 
+Firebug.registerModule(Firebug.JsHubInspector); 
+Firebug.registerPanel(JsHubInspectorPanel); 
 
 }});

@@ -1,3 +1,3 @@
-content firebugtestextension chrome/content/firebugtestextension/ xpcnativewrappers=no
+content jshubinspector chrome/content/jshubinspector/ xpcnativewrappers=no
 
-overlay chrome://firebug/content/firebugOverlay.xul         chrome://firebugtestextension/content/FirebugOverlay.xul
+overlay chrome://firebug/content/firebugOverlay.xul         chrome://jshubinspector/content/FirebugOverlay.xul
