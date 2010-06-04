@@ -7,26 +7,37 @@
             
     <commandset id="mainCommandSet"> 
     
-        <command id="cmd_button1JsHubInspector" oncommand="Firebug.JsHubInspector.button1()"/> 
-        <command id="cmd_button2JsHubInspector" oncommand="Firebug.JsHubInspector.button2()"/> 
+        <command id="cmd_jshubConfig" oncommand="Firebug.JsHubInspectorModel.onConfigButton()"/> 
+        <command id="cmd_jshubEvents" oncommand="Firebug.JsHubInspectorModel.onEventsButton()"/> 
+        <command id="cmd_jshubEventsAll" oncommand="Firebug.JsHubInspectorModel.onEventsAllButton()"/> 
+        <command id="cmd_jshubEventsPage" oncommand="Firebug.JsHubInspectorModel.onEventsPageButton()"/> 
+        <command id="cmd_jshubEventsProduct" oncommand="Firebug.JsHubInspectorModel.onEventsProductButton()"/> 
+        <command id="cmd_jshubEventsOut" oncommand="Firebug.JsHubInspectorModel.onEventsOutButton()"/> 
         
     </commandset> 
     
     <toolbar id="fbToolbar" align="center"> 
-    
         <hbox id="fbToolbarInner" insertbefore="fbDetachButton" flex="1" align="center"> 
         
             <hbox id="fbJsHubInspectorButtons" insertafter="fbNetButtons"> 
-
-                <toolbarbutton label="Button 1" class="toolbar-text-button" 
-                               tooltiptext="Button 1" command="cmd_button1JsHubInspector"/> 
-                               
-                <toolbarbutton label="Button 2" class="toolbar-text-button" 
-                               tooltiptext="Button 2" command="cmd_button2JsHubInspector"/> 
+                <toolbarseparator />
+                <toolbarbutton label="Config" class="toolbar-text-button" 
+                               tooltiptext="Show jsHub tag configuration" command="cmd_jshubConfig"/> 
+                <toolbarbutton label="Events" class="toolbar-text-button" 
+                               tooltiptext="Show events from jsHub tag" command="cmd_jshubEvents"/> 
+                <toolbarseparator />
+                <toolbarbutton label="All" class="toolbar-text-button" 
+                               tooltiptext="Show all event types" command="cmd_jshubEventsAll"/> 
+                <toolbarbutton label="Page" class="toolbar-text-button" 
+                               tooltiptext="Show only page view events" command="cmd_jshubEventsPage"/> 
+                <toolbarbutton label="Ecommerce" class="toolbar-text-button" 
+                               tooltiptext="Show only ecommerce events" command="cmd_jshubEventsProduct"/> 
+                <toolbarbutton label="Output" class="toolbar-text-button" 
+                               tooltiptext="Show only events sent to servers" command="cmd_jshubEventsOut"/> 
+                
             </hbox> 
 
         </hbox> 
-
     </toolbar> 
 
 </overlay>

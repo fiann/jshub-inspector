@@ -36,48 +36,186 @@
 
 
 FBL.ns(function() { with (FBL) { 
-Firebug.JsHubInspector = extend(Firebug.Module, 
-{ 
+  
+var BaseModule = Firebug.ActivableModule ? Firebug.ActivableModule : Firebug.Module;
+const panelName = "JsHubInspector";
+  
+Firebug.JsHubInspectorModel = extend(BaseModule, 
+{
+  /**
+   * Called by Firebug when Firefox window is opened.
+   *
+   * @param {String} prefDomain Preference domain (e.g. extensions.firebug)
+   * @param {Array} prefNames Default Firebug preference array.
+   */
+  initialize: function(prefDomain, prefNames) 
+  { 
+    this.events = [];
+  },
+  
+  /**
+   * Peforms clean up when Firebug is destroyed.
+   * Called by the framework when Firebug is closed for an existing Firefox window.
+   */
   shutdown: function()
   {
-    if (Firebug.getPref('defaultPanelName') == 'JsHubInspector') {
+    if (Firebug.getPref('defaultPanelName') == panelName) {
       Firebug.setPref('defaultPanelName', 'console');
     }
   },
+  /**
+   * Render the buttons for this panel.
+   */
   showPanel: function(browser, panel) 
   { 
-      var isShowing = panel && panel.name == "JsHubInspector"; 
+      var isShowing = panel && panel.name == panelName; 
       var JsHubInspectorButtons = browser.chrome.$("fbJsHubInspectorButtons"); 
       collapse(JsHubInspectorButtons, ! isShowing); 
   }, 
-  button1: function() 
+  
+  /**
+   * Display the configuration for the tag on the page.
+   */
+  onConfigButton: function() 
   { 
-    FirebugContext.getPanel("JsHubInspector").printLine('Clicked Button 1'); 
+    FirebugContext.getPanel(panelName).printLine('Clicked Config Button'); 
   }, 
-  button2: function() 
+  
+  /**
+   * Display the events from the page. 
+   */
+  onEventsButton: function() 
   { 
-    FirebugContext.getPanel("JsHubInspector").printLine('Clicked Button 2'); 
-  } 
+    var panel = FirebugContext.getPanel(panelName);
+    this.log('Clicked events button');
+    panel.hideView('console'); 
+    panel.showView('events');
+    panel.renderEvents();    
+  },
+  
+  onEventsAllButton: function () {},
+  onEventsPageButton: function () {},
+  onEventsProductButton: function () {},
+  onEventsOutButton: function () {},
+  
+  /**
+   * Called by the framework when a context is created for Firefox tab.
+   * 
+   *  @param {Firebug.TabContext} Context for the current Firefox tab.
+   */
+  initContext: function(context)
+  {
+    BaseModule.initContext.apply(this, arguments);
+  },
+  
+  /**
+   * Called by the panel to retrieve the events which are displayed with the 
+   * currently active filters.
+   */
+  getEvents: function() {
+    this.log("getEvents() entered");
+    var window = FirebugContext.window, jsHub = window.wrappedJSObject.jsHub;
+    this.log("Found jsHub object in window", typeof jsHub, FirebugContext.window);
+    if (typeof jsHub !== "object") {
+      return null;
+    } else {
+      // have to assume that malicious code could try to evaluate code in the 
+      var unsafeEvents = jsHub.cachedEvents();
+      if (! unsafeEvents instanceof Array) {
+        return null;
+      }
+      var filteredEvents = [], unsafeEvent, safe;
+      for (var i = 0; i < unsafeEvents.length; i++) {
+        unsafeEvent = unsafeEvents[i];
+        safe = {};
+        safe.type = unsafeEvent.type;
+        safe.timestamp = unsafeEvent.timestamp;
+        safe.data = {};
+        for (var field in unsafeEvent.data) {
+          // TODO should be a deep clone 
+          if (unsafeEvent.data.hasOwnProperty(field) 
+            && (typeof unsafeEvent[field] == 'string' 
+              || typeof unsafeEvent[field] == 'number')) {
+            safe.data[field] = unsafeEvent.data[field];
+          }
+        }
+        filteredEvents.push(safe);
+      }
+      return filteredEvents;
+    }
+  },
+  
+  log: function()
+  {
+    Firebug.Console.logFormatted.apply(Firebug.Console, [arguments]);
+  }
+  
+  
 }); 
 
+/*****************************************************************************/
+// Panel Implementation
+
+/**
+ * @panel This class represents the Inspector panel that is displayed within
+ * Firebug UI.
+ */
+var BasePanel = Firebug.ActivablePanel ? Firebug.ActivablePanel : Firebug.Panel;
 
 function JsHubInspectorPanel() {};
-JsHubInspectorPanel.prototype = extend(Firebug.Panel, 
+JsHubInspectorPanel.prototype = extend(BasePanel, 
 { 
-    name: "JsHubInspector", 
+    name: panelName, 
     title: "jsHub Tag", 
     searchable: false, 
     editable: false,
+
+    initialize: function() {
+        Firebug.Panel.initialize.apply(this, arguments);
+    },
 
     printLine: function(message) {
       var elt = this.document.createElement("p");
       elt.innerHTML = message;
       this.panelNode.appendChild(elt);
+    },
+    
+    showView: function(name) {
+      this.printLine("Showing " + name + " view");
+    },
+    
+    hideView: function(name) {
+      this.printLine("Hiding " + name + " view");
+    },
+    
+    renderEvents: function() {
+      var model = Firebug.JsHubInspectorModel;
+      var events = model.getEvents();
+      if (events === null) {
+        this.printLine("jsHub is not installed");
+      } else if (events.length == 0) {
+        this.printLine("No events to show");
+      } else {
+        var evt, i;
+        for (i = 0; i < events.length; i++) {
+          evt = events[i];
+          this.printLine("Event " + evt.type);
+        }
+      }
     }
+    
 }); 
 
+/*****************************************************************************/
 
-Firebug.registerModule(Firebug.JsHubInspector); 
+// Later Firebug allows modules to be deactivated
+if (Firebug.ActivableModule) {
+  Firebug.registerActivableModule(Firebug.JsHubInspectorModel);  
+}
+else {
+  Firebug.registerModule(Firebug.JsHubInspectorModel);  
+}
+
 Firebug.registerPanel(JsHubInspectorPanel); 
 
 }});
