@@ -1,3 +1,4 @@
 content jshubinspector chrome/content/jshubinspector/ xpcnativewrappers=no
+locale	jshubinspector	en-US		chrome/locale/en-US/
 
 overlay chrome://firebug/content/firebugOverlay.xul         chrome://jshubinspector/content/FirebugOverlay.xul

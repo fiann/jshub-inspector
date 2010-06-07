@@ -39,6 +39,20 @@ FBL.ns(function() { with (FBL) {
   
 var BaseModule = Firebug.ActivableModule ? Firebug.ActivableModule : Firebug.Module;
 const panelName = "JsHubInspector";
+
+
+/**
+ * Localization helpers
+ */
+function $LN_STR(name)
+{
+  return document.getElementById("strings_jshubinspector").getString(name);
+}
+
+function $LN_STRF(name, args)
+{
+    return document.getElementById("strings_jshubinspector").getFormattedString(name, args);
+}
   
 Firebug.JsHubInspectorModel = extend(BaseModule, 
 {
@@ -166,7 +180,7 @@ function JsHubInspectorPanel() {};
 JsHubInspectorPanel.prototype = extend(BasePanel, 
 { 
     name: panelName, 
-    title: "jsHub Tag", 
+    title: $LN_STR("jshubinspector.paneltitle"),
     searchable: false, 
     editable: false,
 

@@ -2,6 +2,11 @@
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"> 
 
+    <stringbundleset id="stringbundleset">
+        <stringbundle id="strings_jshubinspector"
+            src="chrome://jshubinspector/locale/jshubinspector.properties"/>
+    </stringbundleset>
+
     <script type="application/x-javascript"
             src="chrome://jshubinspector/content/FirebugPanel.js"/> 
             
