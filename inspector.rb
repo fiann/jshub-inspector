@@ -36,7 +36,7 @@ end
 # ref: http://www.cuberick.com/2007/11/zip-directory-with-ruby.html
 get '/inspector-2.0.xpi' do
   src = "#{options.root}/public/xpi"
-  output_path = "#{options.root}/tmp/inspector-2.0.xpi"
+  output_path = "#{options.root}/tmp/jshubinspector-2.0.xpi"
 
   # recreate the file for every request (development)
   if File.file?(output_path)
