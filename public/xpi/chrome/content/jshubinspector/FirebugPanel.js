@@ -39,7 +39,8 @@ FBL.ns(function() { with (FBL) {
   
 var BaseModule = Firebug.ActivableModule ? Firebug.ActivableModule : Firebug.Module;
 const panelName = "JsHubInspector";
-
+const jshub_ConsoleService = Components.classes['@mozilla.org/consoleservice;1'].
+  getService(Components.interfaces.nsIConsoleService);
 
 /**
  * Localization helpers
@@ -53,9 +54,27 @@ function $LN_STRF(name, args)
 {
     return document.getElementById("strings_jshubinspector").getFormattedString(name, args);
 }
-  
+
+/**
+ * Log a message to the system log
+ */
+function JsHubLogger(component) {
+  this.log = function(msg) {
+    jshub_ConsoleService.logStringMessage("jshub ("+component+"): " + msg)
+  };
+}
+
+
+/***
+ * The Firebug module for the jsHub inspector
+ */
 Firebug.JsHubInspectorModel = extend(BaseModule, 
 {
+  /**
+   * Logger for this class
+   */
+  logger: new JsHubLogger("Model"),
+  
   /**
    * Called by Firebug when Firefox window is opened.
    *
@@ -63,7 +82,8 @@ Firebug.JsHubInspectorModel = extend(BaseModule,
    * @param {Array} prefNames Default Firebug preference array.
    */
   initialize: function(prefDomain, prefNames) 
-  { 
+  {
+    this.logger.log("initializing");
     this.events = [];
   },
   
@@ -100,8 +120,8 @@ Firebug.JsHubInspectorModel = extend(BaseModule,
    */
   onEventsButton: function() 
   { 
+    this.logger.log('Clicked events button');
     var panel = FirebugContext.getPanel(panelName);
-    this.log('Clicked events button');
     panel.hideView('console'); 
     panel.showView('events');
     panel.renderEvents();    
@@ -127,9 +147,9 @@ Firebug.JsHubInspectorModel = extend(BaseModule,
    * currently active filters.
    */
   getEvents: function() {
-    this.log("getEvents() entered");
+    this.logger.log("getEvents() entered");
     var window = FirebugContext.window, jsHub = window.wrappedJSObject.jsHub;
-    this.log("Found jsHub object in window", typeof jsHub, FirebugContext.window);
+    this.logger.log("jsHub [" + typeof jsHub + "] in window ");
     if (typeof jsHub !== "object") {
       return null;
     } else {
@@ -157,13 +177,7 @@ Firebug.JsHubInspectorModel = extend(BaseModule,
       }
       return filteredEvents;
     }
-  },
-  
-  log: function()
-  {
-    Firebug.Console.logFormatted.apply(Firebug.Console, [arguments]);
   }
-  
   
 }); 
 
@@ -176,7 +190,10 @@ Firebug.JsHubInspectorModel = extend(BaseModule,
  */
 var BasePanel = Firebug.ActivablePanel ? Firebug.ActivablePanel : Firebug.Panel;
 
-function JsHubInspectorPanel() {};
+function JsHubInspectorPanel() {
+  this.logger = new JsHubLogger("Panel");
+};
+
 JsHubInspectorPanel.prototype = extend(BasePanel, 
 { 
     name: panelName, 
@@ -195,7 +212,7 @@ JsHubInspectorPanel.prototype = extend(BasePanel,
     },
     
     showView: function(name) {
-      this.printLine("Showing " + name + " view");
+      this.logger.log('Panel', "Showing " + name + " view");
       Templates.EventsTable.render({}, this.panelNode); 
     },
     
