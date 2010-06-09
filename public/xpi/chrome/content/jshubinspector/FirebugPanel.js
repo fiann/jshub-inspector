@@ -154,6 +154,7 @@ Firebug.JsHubInspectorModel = extend(BaseModule,
       return null;
     } else {
       // have to assume that malicious code could try to evaluate code in the 
+      // context of the extension
       var unsafeEvents = jsHub.cachedEvents();
       if (! unsafeEvents instanceof Array) {
         return null;
@@ -168,8 +169,8 @@ Firebug.JsHubInspectorModel = extend(BaseModule,
         for (var field in unsafeEvent.data) {
           // TODO should be a deep clone 
           if (unsafeEvent.data.hasOwnProperty(field) 
-            && (typeof unsafeEvent[field] == 'string' 
-              || typeof unsafeEvent[field] == 'number')) {
+            && (typeof unsafeEvent.data[field] == 'string' 
+              || typeof unsafeEvent.data[field] == 'number')) {
             safe.data[field] = unsafeEvent.data[field];
           }
         }
@@ -212,8 +213,15 @@ JsHubInspectorPanel.prototype = extend(BasePanel,
     },
     
     showView: function(name) {
-      this.logger.log('Panel', "Showing " + name + " view");
-      Templates.EventsTable.render({}, this.panelNode); 
+      if (name === "events") {
+        this.logger.log("Showing events view");
+        this.renderEvents();
+      } else if (name === "config") {
+        this.logger.log("Showing config view");
+        this.renderConfig();
+      } else {
+        throw new Error("Unknown view " + name);
+      }
     },
     
     hideView: function(name) {
@@ -228,23 +236,25 @@ JsHubInspectorPanel.prototype = extend(BasePanel,
       } else if (events.length == 0) {
         this.printLine("No events to show");
       } else {
-        var evt, i, evtNode, field;
-        for (i = 0; i < events.length; i++) {
-          evt = events[i];
-          evtNode = Templates.Event.eventNode.append(
-            {eventName: evt.type},
-            this.panelNode,
-            null);
-          for (field in evt.data) {
-            Templates.Event.dataNode.append(
-            { name: field, value: evt.data[field] },
-              evtNode,
-              null);
-          }
-        }
+        Templates.EventsTable.render(events, this.panelNode); 
+        
+        // var evt, i, evtNode, field;
+        //         for (i = 0; i < events.length; i++) {
+        //           evt = events[i];
+        //           evtNode = Templates.Event.eventNode.append(
+        //             {eventName: evt.type},
+        //             this.panelNode,
+        //             null);
+        //           for (field in evt.data) {
+        //             Templates.Event.dataNode.append(
+        //             { name: field, value: evt.data[field] },
+        //               evtNode,
+        //               null);
+        //           }
+        //         }
       }
     }
-    
+
 }); 
 
 /*****************************************************************************/
@@ -256,10 +266,13 @@ var Templates = Firebug.JsHubInspectorModel.Templates = {};
 Templates.Rep = domplate(Firebug.Rep, {});
 
 Templates.EventsTable = domplate(Templates.Rep, {
+  logger: new JsHubLogger("EventsTable template"),
+  
   tableTag:
     TABLE({"class": "jshubEventsTable", cellpadding: 0, cellspacing: 0, hiddenCols: ""},
       TBODY(
         TR({"class": "jshubHeaderRow", onclick: "$onClickHeader"},
+          TD({id: "colEventExpander", "class": "jshubHeaderCell alphaValue"}, ""),
           TD({id: "colEventName", "class": "jshubHeaderCell alphaValue"},
             DIV({"class": "jshubHeaderCellBox", title: $LN_STR("jshub.header.eventname.tooltip")}, 
             $LN_STR("jshub.header.eventname"))
@@ -272,34 +285,87 @@ Templates.EventsTable = domplate(Templates.Rep, {
             DIV({"class": "jshubHeaderCellBox", title: $LN_STR("jshub.header.timestamp.tooltip")}, 
             $LN_STR("jshub.header.timestamp"))
           )
+        ),
+        FOR("event", "$events", 
+          TAG("$eventRowTag", { event: "$event"})
+          // TAG("$eventDataRowTag", { eventData: "$event.data" })
         )
       )
     ),
     
-    onClickHeader: function (event) {
-      //do stuff
-    },
-    
-    render: function (events, parentNode) {
-      var table = this.tableTag.replace({}, parentNode, this);
+  eventRowTag:
+    TR({ "class": "jshubEventRow", eventData: "$event.data", onclick: "$onClickEvent", expanded: false }, 
+      TD({}, "+"),
+      TD({}, "$event.type"),
+      TD({}, "$event|summarize"),
+      TD({}, "$event.timestamp")
+    ),
+  
+  eventDataRowTag:
+    TR({ "class": "jshubEventDataRow" },
+      TD({ colspan: 4 },
+        UL(
+          FOR("item", "$eventData", 
+            LI({ "class": 'eventData' },
+              SPAN({ "class": 'eventDataName' }, "$item.name"),
+              SPAN(': '),
+              SPAN({ "class": 'eventDataValue' }, "$item.value")
+            )
+          )
+        )
+      )
+    ),
+
+  onClickHeader: function (event) {
+    //do stuff
+  },
+  
+  onClickEvent: function (event) {
+    alert("Click " + event.target);
+    var eventRow = event.target, eventData = eventRow.eventData;
+  },
+  
+  summarize: function (eventObject) {
+    this.logger.log("summarize " + eventObject.toSource());
+    var data = eventObject.data, summary = '{ ';
+    var field, value;
+    var count = 0, displayedCount = 0, maxCount = 6;
+    this.logger.log("data is " + data.toSource());
+    for (field in data) {
+      if (data.hasOwnProperty(field)) {
+        if (++count > maxCount || summary.length > 80) {
+          continue;
+        } else {
+          ++displayedCount;
+        }
+        value = data[field];
+        if (typeof value !== 'number') {
+          value = '"' + value.toString() + '"';
+        }
+        if (value.length > 26) {
+          value = value.substring(0, 20) + '..."';
+        }
+        summary += field + ": " + value + ", ";
+      }
     }
+    var elided = count - displayedCount;
+    if (elided > 0) {
+      summary += "and " + elided + " other" + (elided !== 1 ? "s" : "") + ", ";
+    }
+    if (summary.length > 2) {
+      summary = summary.substring(0, summary.length - 2);
+    }
+    summary += " }";
+    return summary;
+  },
+  
+  render: function (events, parentNode) {
+    events = events || [];
+    var table = this.tableTag.replace({events: events}, parentNode, this);
+  }
 });
 
-Templates.Event = domplate(Templates.Rep, {
-  eventNode: DIV({class: 'event', onclick: "$onClickRoot"}, 
-    SPAN("Event type: "),
-    SPAN("$eventName"),
-    UL()),
-    
-  onClickRoot: function(event) {
-    alert("Clicky!");
-  },
-    
-  dataNode: LI({class: 'eventData'},
-    SPAN({class: 'eventDataName'}, "$name"),
-    SPAN(': '),
-    SPAN({class: 'eventDataValue'}, "$value"))
-});
+
 
 
 /*****************************************************************************/
