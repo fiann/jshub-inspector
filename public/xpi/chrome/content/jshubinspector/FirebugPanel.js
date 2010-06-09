@@ -180,14 +180,14 @@ function JsHubInspectorPanel() {};
 JsHubInspectorPanel.prototype = extend(BasePanel, 
 { 
     name: panelName, 
-    title: $LN_STR("jshubinspector.paneltitle"),
+    title: $LN_STR("jshub.panel.title"),
     searchable: false, 
     editable: false,
 
     initialize: function() {
-        Firebug.Panel.initialize.apply(this, arguments);
+      Firebug.Panel.initialize.apply(this, arguments);
     },
-
+    
     printLine: function(message) {
       var elt = this.document.createElement("p");
       elt.innerHTML = message;
@@ -196,6 +196,7 @@ JsHubInspectorPanel.prototype = extend(BasePanel,
     
     showView: function(name) {
       this.printLine("Showing " + name + " view");
+      Templates.EventsTable.render({}, this.panelNode); 
     },
     
     hideView: function(name) {
@@ -210,15 +211,79 @@ JsHubInspectorPanel.prototype = extend(BasePanel,
       } else if (events.length == 0) {
         this.printLine("No events to show");
       } else {
-        var evt, i;
+        var evt, i, evtNode, field;
         for (i = 0; i < events.length; i++) {
           evt = events[i];
-          this.printLine("Event " + evt.type);
+          evtNode = Templates.Event.eventNode.append(
+            {eventName: evt.type},
+            this.panelNode,
+            null);
+          for (field in evt.data) {
+            Templates.Event.dataNode.append(
+            { name: field, value: evt.data[field] },
+              evtNode,
+              null);
+          }
         }
       }
     }
     
 }); 
+
+/*****************************************************************************/
+/*
+ * Templates for rendering visible elements
+ */
+var Templates = Firebug.JsHubInspectorModel.Templates = {};
+
+Templates.Rep = domplate(Firebug.Rep, {});
+
+Templates.EventsTable = domplate(Templates.Rep, {
+  tableTag:
+    TABLE({"class": "jshubEventsTable", cellpadding: 0, cellspacing: 0, hiddenCols: ""},
+      TBODY(
+        TR({"class": "jshubHeaderRow", onclick: "$onClickHeader"},
+          TD({id: "colEventName", "class": "jshubHeaderCell alphaValue"},
+            DIV({"class": "jshubHeaderCellBox", title: $LN_STR("jshub.header.eventname.tooltip")}, 
+            $LN_STR("jshub.header.eventname"))
+          ),
+          TD({id: "colValue", "class": "jshubHeaderCell alphaValue"},
+            DIV({"class": "jshubHeaderCellBox", title: $LN_STR("jshub.header.value.tooltip")}, 
+            $LN_STR("jshub.header.value"))
+          ),
+          TD({id: "colTimestamp", "class": "jshubHeaderCell"},
+            DIV({"class": "jshubHeaderCellBox", title: $LN_STR("jshub.header.timestamp.tooltip")}, 
+            $LN_STR("jshub.header.timestamp"))
+          )
+        )
+      )
+    ),
+    
+    onClickHeader: function (event) {
+      //do stuff
+    },
+    
+    render: function (events, parentNode) {
+      var table = this.tableTag.replace({}, parentNode, this);
+    }
+});
+
+Templates.Event = domplate(Templates.Rep, {
+  eventNode: DIV({class: 'event', onclick: "$onClickRoot"}, 
+    SPAN("Event type: "),
+    SPAN("$eventName"),
+    UL()),
+    
+  onClickRoot: function(event) {
+    alert("Clicky!");
+  },
+    
+  dataNode: LI({class: 'eventData'},
+    SPAN({class: 'eventDataName'}, "$name"),
+    SPAN(': '),
+    SPAN({class: 'eventDataValue'}, "$value"))
+});
+
 
 /*****************************************************************************/
 
