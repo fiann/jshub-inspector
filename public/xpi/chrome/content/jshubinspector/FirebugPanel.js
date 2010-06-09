@@ -287,8 +287,8 @@ Templates.EventsTable = domplate(Templates.Rep, {
           )
         ),
         FOR("event", "$events", 
-          TAG("$eventRowTag", { event: "$event"})
-          // TAG("$eventDataRowTag", { eventData: "$event.data" })
+          TAG("$eventRowTag", { event: "$event"}),
+          TAG("$eventDataRowTag", { eventData: "$event.data" })
         )
       )
     ),
@@ -305,7 +305,7 @@ Templates.EventsTable = domplate(Templates.Rep, {
     TR({ "class": "jshubEventDataRow" },
       TD({ colspan: 4 },
         UL(
-          FOR("item", "$eventData", 
+          FOR("item", "$eventData|toDataArray", 
             LI({ "class": 'eventData' },
               SPAN({ "class": 'eventDataName' }, "$item.name"),
               SPAN(': '),
@@ -357,6 +357,21 @@ Templates.EventsTable = domplate(Templates.Rep, {
     }
     summary += " }";
     return summary;
+  },
+  
+  toDataArray: function (object) {
+    this.logger.log("toDataArray " + object.toSource());
+    var array = [], value;
+    for (field in object) {
+      if (object.hasOwnProperty(field)) {
+        value = object[field];
+        if (typeof value !== 'number') {
+          value = '"' + value.toString() + '"';
+        }
+        array.push({ name: field, value: value });
+      }
+    }
+    return array;
   },
   
   render: function (events, parentNode) {
