@@ -287,14 +287,13 @@ Templates.EventsTable = domplate(Templates.Rep, {
           )
         ),
         FOR("event", "$events", 
-          TAG("$eventRowTag", { event: "$event"}),
-          TAG("$eventDataRowTag", { eventData: "$event.data" })
+          TAG("$eventRowTag", { event: "$event"})
         )
       )
     ),
     
   eventRowTag:
-    TR({ "class": "jshubEventRow", eventData: "$event.data", onclick: "$onClickEvent", expanded: false }, 
+    TR({ "class": "jshubEventRow", _eventObject: "$event", onclick: "$onClickEvent" }, 
       TD({}, "+"),
       TD({}, "$event.type"),
       TD({}, "$event|summarize"),
@@ -321,8 +320,17 @@ Templates.EventsTable = domplate(Templates.Rep, {
   },
   
   onClickEvent: function (event) {
-    alert("Click " + event.target);
-    var eventRow = event.target, eventData = eventRow.eventData;
+    var row = getAncestorByClass(event.target, "jshubEventRow");
+    var eventObject = row.eventObject;
+    if (hasClass(row, "expanded")) {
+      this.logger.log("Closing event details for " + eventObject.type);
+      row.parentNode.removeChild(row.nextSibling);
+      removeClass(row, "expanded");
+    } else {
+      this.logger.log("Rendering event details for " + eventObject.type + " event after " + row);      
+      Templates.EventsTable.eventDataRowTag.insertRows({ eventData: eventObject.data }, row);
+      setClass(row, "expanded");
+    }
   },
   
   summarize: function (eventObject) {
