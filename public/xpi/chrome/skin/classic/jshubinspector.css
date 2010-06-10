@@ -1,0 +1,104 @@
+.panelNode-JsHubInspector {
+  overflow-x: hidden;
+}
+
+
+/*******************************************************
+ * The Events table
+ */
+.jshubEventsTable {
+  width: 100%;
+}
+
+.jshubHeaderRow {
+    height: 16px;
+}
+
+.jshubHeaderCell {
+    cursor: pointer;
+    -moz-user-select: none;
+    border-bottom: 1px solid #9C9C9C;
+    padding: 0 !important;
+    font-weight: bold;
+    background: #BBBBBB url(chrome://firebug/skin/tableHeader.gif) repeat-x;
+    white-space: nowrap;
+}
+
+.jshubHeaderRow > .jshubHeaderCell:first-child > .jshubHeaderCellBox {
+    padding: 2px 14px 2px 18px;
+}
+
+.jshubHeaderCellBox {
+    padding: 2px 14px 2px 10px;
+    border-left: 1px solid #D9D9D9;
+    border-right: 1px solid #9C9C9C;
+}
+
+.jshubHeaderCell:hover:active {
+    background: #959595 url(chrome://firebug/skin/tableHeaderActive.gif) repeat-x;
+}
+
+.jshubHeaderSorted {
+    background: #7D93B2 url(chrome://firebug/skin/tableHeaderSorted.gif) repeat-x;
+}
+
+.jshubHeaderSorted > .jshubHeaderCellBox {
+    border-right-color: #6B7C93;
+    background: url(chrome://firebug/skin/arrowDown.png) no-repeat right;    
+}
+
+.jshubHeaderSorted.sortedAscending > .jshubHeaderCellBox {
+    background-image: url(chrome://firecookie/skin/arrowUp.png);
+}
+
+.jshubHeaderSorted:hover:active {
+    background: #536B90 url(chrome://firecookie/skin/tableHeaderSortedActive.gif) repeat-x;
+}
+
+.jshubEventRow {
+    background: white;
+}
+
+.jshubEventRow:hover {
+    background: #EFEFEF;
+}
+
+.jshubEventBreakpointCell {
+  padding: 0;
+  vertical-align: top;
+  border-bottom: 1px solid #EFEFEF;  
+  white-space: nowrap;
+  height: 15px;
+  margin-right: 0 !important;
+}
+
+.jshubEventNameLabel {
+  background-image: url(chrome://firebug/skin/win/twistyClosed.png);
+  background-repeat: no-repeat;
+  background-position: 2px 2px;
+  overflow: hidden;
+  font-weight: bold;
+  min-width: 70px;
+  margin-left: 10px;
+  padding: 1px 0 2px 18px !important;
+  -moz-box-sizing: padding-box;
+}
+
+.jshubEventNameLabel:hover {
+  cursor: pointer;
+  color: blue;
+  text-decoration: underline;
+}
+
+.jshubEventRow.expanded .jshubEventNameLabel {
+  background-image: url(chrome://firebug/skin/win/twistyOpen.png);
+}
+
+.jshubEventSummaryLabel,
+.jshubEventTimestampLabel {
+  padding: 1px 10px 2px 0 !important;
+  width: 100%;
+  overflow: hidden;
+  display: -moz-box;
+}
+

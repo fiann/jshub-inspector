@@ -140,6 +140,23 @@ Firebug.JsHubInspectorModel = extend(BaseModule,
   initContext: function(context)
   {
     BaseModule.initContext.apply(this, arguments);
+    context.baseTimestamp = new Date().getTime();
+  },
+  
+  /**
+   * Called by the panel when it initializes
+   */
+  addStylesheet: function(panel) {
+    this.logger.log('addStyleSheet to ' + panel.name);
+    // Make sure the stylesheet isn't appended twice.
+    var doc = panel.document;
+    if ($("jshubStylesheet", doc)) {
+      return;
+    }
+
+    var styleSheet = createStyleSheet(doc, "chrome://jshubinspector/skin/jshubinspector.css");
+    styleSheet.setAttribute("id", "jshubStylesheet");
+    addStyleSheet(doc, styleSheet);
   },
   
   /**
@@ -165,6 +182,7 @@ Firebug.JsHubInspectorModel = extend(BaseModule,
         safe = {};
         safe.type = unsafeEvent.type;
         safe.timestamp = unsafeEvent.timestamp;
+        safe._baseTimestamp = FirebugContext.baseTimestamp;
         safe.data = {};
         for (var field in unsafeEvent.data) {
           // TODO should be a deep clone 
@@ -203,7 +221,9 @@ JsHubInspectorPanel.prototype = extend(BasePanel,
     editable: false,
 
     initialize: function() {
+      this.logger.log("initializing");
       Firebug.Panel.initialize.apply(this, arguments);
+      Firebug.JsHubInspectorModel.addStylesheet(this);
     },
     
     printLine: function(message) {
@@ -272,7 +292,7 @@ Templates.EventsTable = domplate(Templates.Rep, {
     TABLE({"class": "jshubEventsTable", cellpadding: 0, cellspacing: 0, hiddenCols: ""},
       TBODY(
         TR({"class": "jshubHeaderRow", onclick: "$onClickHeader"},
-          TD({id: "colEventExpander", "class": "jshubHeaderCell alphaValue"}, ""),
+          TD({id: "colEventBreakpoint", "class": "jshubHeaderCell alphaValue"}, ""),
           TD({id: "colEventName", "class": "jshubHeaderCell alphaValue"},
             DIV({"class": "jshubHeaderCellBox", title: $LN_STR("jshub.header.eventname.tooltip")}, 
             $LN_STR("jshub.header.eventname"))
@@ -287,17 +307,25 @@ Templates.EventsTable = domplate(Templates.Rep, {
           )
         ),
         FOR("event", "$events", 
-          TAG("$eventRowTag", { event: "$event"})
+          TAG("$eventRowTag", { event: "$event" })
         )
       )
     ),
     
   eventRowTag:
     TR({ "class": "jshubEventRow", _eventObject: "$event", onclick: "$onClickEvent" }, 
-      TD({}, "+"),
-      TD({}, "$event.type"),
-      TD({}, "$event|summarize"),
-      TD({}, "$event.timestamp")
+      TD({ "class": "jshubEventBreakpointCell" }, 
+        DIV({ "class": "jshubEventBreakpointLabel sourceLine" }, "&nbsp;")
+      ),
+      TD({ "class": "jshubEventNameCell" }, 
+        DIV({"class": "jshubEventNameLabel" }, "$event.type")
+      ),
+      TD({ "class": "jshubEventSummaryCell" },
+        DIV({"class": "jshubEventSummaryLabel" }, "$event|summarize")
+      ),
+      TD({ "class": "jshubEventTimestampCell" },
+        DIV({"class": "jshubEventTimestampLabel" }, "$event|calculateTimestamp")
+      )
     ),
   
   eventDataRowTag:
@@ -367,6 +395,10 @@ Templates.EventsTable = domplate(Templates.Rep, {
     return summary;
   },
   
+  calculateTimestamp: function (object) {
+    return (object.timestamp - object._baseTimestamp) + "ms";
+  },
+  
   toDataArray: function (object) {
     this.logger.log("toDataArray " + object.toSource());
     var array = [], value;
@@ -384,7 +416,7 @@ Templates.EventsTable = domplate(Templates.Rep, {
   
   render: function (events, parentNode) {
     events = events || [];
-    var table = this.tableTag.replace({events: events}, parentNode, this);
+    this.tableTag.replace({events: events}, parentNode, this);
   }
 });
 
