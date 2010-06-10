@@ -386,7 +386,7 @@ Templates.EventsTable = domplate(Templates.Rep, {
     }
     var elided = count - displayedCount;
     if (elided > 0) {
-      summary += "and " + elided + " other" + (elided !== 1 ? "s" : "") + ", ";
+      summary += "and " + elided + " other field" + this.plural(elided) + ", ";
     }
     if (summary.length > 2) {
       summary = summary.substring(0, summary.length - 2);
