@@ -1,50 +1,50 @@
-<?xml version="1.0"?> 
-
+<?xml version="1.0"?>
 <?xml-stylesheet href="chrome://jshubinspector/skin/jshubinspector.css"?>
 
-<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"> 
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-    <stringbundleset id="stringbundleset">
-        <stringbundle id="strings_jshubinspector"
-            src="chrome://jshubinspector/locale/jshubinspector.properties"/>
-    </stringbundleset>
+  <stringbundleset id="stringbundleset">
+    <stringbundle id="strings_jshubinspector" src="chrome://jshubinspector/locale/jshubinspector.properties"/>
+  </stringbundleset>
 
-    <script type="application/x-javascript"
-            src="chrome://jshubinspector/content/FirebugPanel.js"/> 
-            
-    <commandset id="mainCommandSet"> 
-    
-        <command id="cmd_jshubConfig" oncommand="Firebug.JsHubInspectorModel.onConfigButton()"/> 
-        <command id="cmd_jshubEvents" oncommand="Firebug.JsHubInspectorModel.onEventsButton()"/> 
-        <command id="cmd_jshubEventsAll" oncommand="Firebug.JsHubInspectorModel.onEventsAllButton()"/> 
-        <command id="cmd_jshubEventsPage" oncommand="Firebug.JsHubInspectorModel.onEventsPageButton()"/> 
-        <command id="cmd_jshubEventsProduct" oncommand="Firebug.JsHubInspectorModel.onEventsProductButton()"/> 
-        <command id="cmd_jshubEventsOut" oncommand="Firebug.JsHubInspectorModel.onEventsOutButton()"/> 
-        
-    </commandset> 
-    
-    <toolbar id="fbToolbar" align="center"> 
-        <hbox id="fbToolbarInner" insertbefore="fbDetachButton" flex="1" align="center"> 
-        
-            <hbox id="fbJsHubInspectorButtons" insertafter="fbNetButtons"> 
-                <toolbarseparator />
-                <toolbarbutton label="Config" class="toolbar-text-button" 
-                               tooltiptext="Show jsHub tag configuration" command="cmd_jshubConfig"/> 
-                <toolbarbutton label="Events" class="toolbar-text-button" 
-                               tooltiptext="Show events from jsHub tag" command="cmd_jshubEvents"/> 
-                <toolbarseparator />
-                <toolbarbutton label="All" class="toolbar-text-button" 
-                               tooltiptext="Show all event types" command="cmd_jshubEventsAll"/> 
-                <toolbarbutton label="Page" class="toolbar-text-button" 
-                               tooltiptext="Show only page view events" command="cmd_jshubEventsPage"/> 
-                <toolbarbutton label="Ecommerce" class="toolbar-text-button" 
-                               tooltiptext="Show only ecommerce events" command="cmd_jshubEventsProduct"/> 
-                <toolbarbutton label="Output" class="toolbar-text-button" 
-                               tooltiptext="Show only events sent to servers" command="cmd_jshubEventsOut"/> 
-                
-            </hbox> 
+  <script type="application/x-javascript" src="chrome://jshubinspector/content/FirebugPanel.js"/>
 
-        </hbox> 
-    </toolbar> 
-
+  <commandset id="mainCommandSet">
+    <toolbarbutton id="fbNetFilter-xhr" label="XHR" type="radio" tooltiptext="XMLHttpRequest" class="toolbar-text-button" group="firebugNetFilter" oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'xhr')"/>
+    <command id="cmd_jshubConfig" oncommand="Firebug.JsHubInspectorModel.onConfigButton(FirebugContext)"/>
+    <command id="cmd_jshubEvents" oncommand="Firebug.JsHubInspectorModel.onEventsButton(FirebugContext)"/>
+    <command id="cmd_jshubEventsAll" oncommand="Firebug.JsHubInspectorModel.onChangeEventsFilter(FirebugContext, 'all')"/>
+    <command id="cmd_jshubEventsSystem" oncommand="Firebug.JsHubInspectorModel.onChangeEventsFilter(FirebugContext, 'system')"/>
+    <command id="cmd_jshubEventsPage" oncommand="Firebug.JsHubInspectorModel.onChangeEventsFilter(FirebugContext, 'page')"/>
+    <command id="cmd_jshubEventsProduct" oncommand="Firebug.JsHubInspectorModel.onChangeEventsFilter(FirebugContext, 'product')"/>
+    <command id="cmd_jshubEventsOut" oncommand="Firebug.JsHubInspectorModel.onChangeEventsFilter(FirebugContext, 'output')"/>
+  </commandset>
+  
+  <toolbar id="fbToolbar" align="center">
+    <hbox id="fbToolbarInner" insertbefore="fbDetachButton" flex="1" align="center">
+      <hbox id="fbJsHubInspectorButtons" insertafter="fbNetButtons">
+        <toolbarseparator/>
+        <toolbarbutton label="Config" class="toolbar-text-button" tooltiptext="Show jsHub tag configuration" command="cmd_jshubConfig"/>
+        <toolbarbutton label="Events" class="toolbar-text-button" tooltiptext="Show events from jsHub tag" command="cmd_jshubEvents"/>
+        <hbox id="jshubEventsFilter" class="noTabStop">
+          <toolbarseparator/>
+          <toolbarbutton id="jshubEventsFilter-all" label="All" type="radio" class="toolbar-text-button"
+              group="jshubEventsFilter" checked="true"
+              tooltiptext="Show all event types" command="cmd_jshubEventsAll"/>
+          <toolbarbutton id="jshubEventsFilter-system" label="System" type="radio" class="toolbar-text-button"
+              group="jshubEventsFilter"
+              tooltiptext="Show only internal tag lifecycle events" command="cmd_jshubEventsSystem"/>
+          <toolbarbutton id="jshubEventsFilter-page" label="Page" type="radio" class="toolbar-text-button"
+              group="jshubEventsFilter"
+              tooltiptext="Show only page view events" command="cmd_jshubEventsPage"/>
+          <toolbarbutton id="jshubEventsFilter-product" label="Ecommerce" type="radio" class="toolbar-text-button"
+              group="jshubEventsFilter"
+              tooltiptext="Show only ecommerce events" command="cmd_jshubEventsProduct"/>
+          <toolbarbutton id="jshubEventsFilter-out" label="Output" type="radio" class="toolbar-text-button"
+              group="jshubEventsFilter"
+              tooltiptext="Show only events sent to servers" command="cmd_jshubEventsOut"/>
+        </hbox>
+      </hbox>
+    </hbox>
+  </toolbar>
 </overlay>

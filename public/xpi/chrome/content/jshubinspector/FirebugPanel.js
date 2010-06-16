@@ -42,6 +42,7 @@ const panelName = "JsHubInspector";
 const jshub_ConsoleService = Components.classes['@mozilla.org/consoleservice;1'].
   getService(Components.interfaces.nsIConsoleService);
 
+
 /**
  * Localization helpers
  */
@@ -64,6 +65,46 @@ function JsHubLogger(component) {
   };
 }
 
+var EventFilter = function (filter) {
+  var systemEvents = ("plugin-initialization-start, plugin-initialization-complete, " + 
+    "data-capture-start, data-capture-complete, " +
+    "technographics-parse-start, technographics-parse-complete").split(", ");
+  var pageEvents = "page-view".split(", ");
+  var productEvents = "product-view".split(", ");
+  var outputEvents = "form-transport-sent".split(", ");
+  this.filter = filter;
+  
+  var isInList = function(list, item) {
+    for (var i=0; i < list.length; i++) {
+      if (list[i] === item) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  this.check = function (event) {
+    if (typeof event !== 'object' || typeof event.type !== 'string') {
+      throw new Error("Invalid event to filter");
+    }
+    switch(this.filter) {
+      case 'all':
+        return true;
+      case 'system':
+        return isInList(systemEvents, event.type);
+      case 'page':
+        return isInList(pageEvents, event.type);
+      case 'product':
+        return isInList(productEvents, event.type);
+      case 'custom':
+        return (event.data && event.data["custom-event"] === "true");
+      case 'output':
+        return isInList(outputEvents, event.type);
+      default:
+        return false;
+    }
+  };
+};
 
 /***
  * The Firebug module for the jsHub inspector
@@ -97,40 +138,50 @@ Firebug.JsHubInspectorModel = extend(BaseModule,
       Firebug.setPref('defaultPanelName', 'console');
     }
   },
+  
   /**
    * Render the buttons for this panel.
    */
   showPanel: function(browser, panel) 
   { 
-      var isShowing = panel && panel.name == panelName; 
-      var JsHubInspectorButtons = browser.chrome.$("fbJsHubInspectorButtons"); 
-      collapse(JsHubInspectorButtons, ! isShowing); 
+    this.logger.log("showPanel() entered");
+    var isShowing = panel && panel.name == panelName; 
+    var JsHubInspectorButtons = browser.chrome.$("fbJsHubInspectorButtons"); 
+    collapse(JsHubInspectorButtons, ! isShowing); 
+    if (isShowing) {
+      this.showView(panel.context, 'events');
+    }
   }, 
-  
+    
   /**
    * Display the configuration for the tag on the page.
    */
-  onConfigButton: function() 
+  onConfigButton: function(context) 
   { 
-    FirebugContext.getPanel(panelName).printLine('Clicked Config Button'); 
+    this.showView(context, 'config');
   }, 
   
   /**
    * Display the events from the page. 
    */
-  onEventsButton: function() 
+  onEventsButton: function(context) 
   { 
-    this.logger.log('Clicked events button');
-    var panel = FirebugContext.getPanel(panelName);
-    panel.hideView('console'); 
-    panel.showView('events');
-    panel.renderEvents();    
+    this.showView(context, 'events');
   },
   
-  onEventsAllButton: function () {},
-  onEventsPageButton: function () {},
-  onEventsProductButton: function () {},
-  onEventsOutButton: function () {},
+  /**
+   * Filters for event types
+   */
+  onChangeEventsFilter: function (context, filter) {
+    var previousFilter = context.eventFilter;
+    if (filter !== previousFilter) {
+      context.eventFilter = filter;
+      if (context.currentView === "events") {
+        var panel = context.getPanel(panelName);
+        panel.renderEvents();
+      }
+    }
+  },
   
   /**
    * Called by the framework when a context is created for Firefox tab.
@@ -141,8 +192,24 @@ Firebug.JsHubInspectorModel = extend(BaseModule,
   {
     BaseModule.initContext.apply(this, arguments);
     context.baseTimestamp = new Date().getTime();
+    // The view which is currently rendered
+    context.currentView = null;
+    // Filters in use on events
+    context.eventFilter = 'all';
   },
   
+  /**
+   * Tell the panel to render a view, if it is a change from the previous view
+   */
+  showView: function(context, view) {
+    var panel = context.getPanel(panelName), previousView = context.currentView;
+    this.logger.log("Changing view from "+previousView+" to "+view);
+    if (view !== previousView) {
+      context.currentView = view;
+      panel.showView(view);      
+    }
+  },
+
   /**
    * Called by the panel when it initializes
    */
@@ -165,8 +232,8 @@ Firebug.JsHubInspectorModel = extend(BaseModule,
    */
   getEvents: function() {
     this.logger.log("getEvents() entered");
-    var window = FirebugContext.window, jsHub = window.wrappedJSObject.jsHub;
-    this.logger.log("jsHub [" + typeof jsHub + "] in window ");
+    var context = FirebugContext, window = context.window, jsHub = window.wrappedJSObject.jsHub;
+    var filter = new EventFilter(context.eventFilter);
     if (typeof jsHub !== "object") {
       return null;
     } else {
@@ -179,6 +246,9 @@ Firebug.JsHubInspectorModel = extend(BaseModule,
       var filteredEvents = [], unsafeEvent, safe;
       for (var i = 0; i < unsafeEvents.length; i++) {
         unsafeEvent = unsafeEvents[i];
+        if (! filter.check(unsafeEvent)) {
+          continue;
+        }
         safe = {};
         safe.type = unsafeEvent.type;
         safe.timestamp = unsafeEvent.timestamp;
@@ -257,22 +327,11 @@ JsHubInspectorPanel.prototype = extend(BasePanel,
         this.printLine("No events to show");
       } else {
         Templates.EventsTable.render(events, this.panelNode); 
-        
-        // var evt, i, evtNode, field;
-        //         for (i = 0; i < events.length; i++) {
-        //           evt = events[i];
-        //           evtNode = Templates.Event.eventNode.append(
-        //             {eventName: evt.type},
-        //             this.panelNode,
-        //             null);
-        //           for (field in evt.data) {
-        //             Templates.Event.dataNode.append(
-        //             { name: field, value: evt.data[field] },
-        //               evtNode,
-        //               null);
-        //           }
-        //         }
       }
+    },
+    
+    renderConfig: function() {
+      this.panelNode.innerHTML = "<p>Config view</p>";
     }
 
 }); 
