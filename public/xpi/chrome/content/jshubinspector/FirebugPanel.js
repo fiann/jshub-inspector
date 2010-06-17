@@ -321,13 +321,7 @@ JsHubInspectorPanel.prototype = extend(BasePanel,
     renderEvents: function() {
       var model = Firebug.JsHubInspectorModel;
       var events = model.getEvents();
-      if (events === null) {
-        this.printLine("jsHub is not installed");
-      } else if (events.length == 0) {
-        this.printLine("No events to show");
-      } else {
-        Templates.EventsTable.render(events, this.panelNode); 
-      }
+      Templates.EventsTable.render(events, this.panelNode); 
     },
     
     renderConfig: function() {
@@ -401,6 +395,9 @@ Templates.EventsTable = domplate(Templates.Rep, {
         )
       )
     ),
+    
+  notInstalledTag:
+    DIV($LN_STR("jshub.msg.not_installed")),
 
   onClickHeader: function (event) {
     //do stuff
@@ -474,8 +471,11 @@ Templates.EventsTable = domplate(Templates.Rep, {
   },
   
   render: function (events, parentNode) {
-    events = events || [];
-    this.tableTag.replace({events: events}, parentNode, this);
+    if (events === null) {
+      this.notInstalledTag.replace({}, parentNode, this);
+    } else {
+      this.tableTag.replace({events: events}, parentNode, this);
+    }    
   }
 });
 
